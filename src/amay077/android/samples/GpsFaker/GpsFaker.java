@@ -17,7 +17,7 @@ import android.widget.Toast;
 /**
  *
  * @author hironobu
- *
+ * testest
  */
 public class GpsFaker extends Activity {
 
