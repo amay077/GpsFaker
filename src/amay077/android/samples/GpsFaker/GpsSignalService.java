@@ -25,7 +25,7 @@ import android.os.IBinder;
 
 /**
  * @author h_okuyama
- * aaa
+ * aaabbbb
  */
 public class GpsSignalService extends Service {
 
