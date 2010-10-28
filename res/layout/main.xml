@@ -5,7 +5,6 @@
     android:layout_height="fill_parent"
     >
 
-<Button android:id="@+id/ButtonStartService" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Start Service"></Button>
 <Button android:id="@+id/ButtonEnableProvider" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Enable DummyProvider"></Button>
 <TableLayout android:id="@+id/TableLayout01" android:layout_width="fill_parent" android:layout_height="wrap_content"
 android:stretchColumns="1"
@@ -22,5 +21,4 @@ android:shrinkColumns="1">
 <Button android:id="@+id/ButtonPause" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Pause"></Button>
 <Button android:id="@+id/ButtonStop" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Stop"></Button>
 <Button android:id="@+id/ButtonDisableProvider" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Disable DummyProvider"></Button>
-<Button android:id="@+id/ButtonStopService" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="Stop Service"></Button>
 </LinearLayout>

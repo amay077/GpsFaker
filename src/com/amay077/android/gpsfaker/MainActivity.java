@@ -67,22 +67,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        // サービス開始
-        Button btn = (Button)findViewById(R.id.ButtonStartService);
-        btn.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				if (m_gpsService != null) return;
-				startService();
-				showToast("サービスを開始しました。");
-			}
-		});
-
         // プロバイダ有効化
-        btn = (Button)findViewById(R.id.ButtonEnableProvider);
+        Button btn = (Button)findViewById(R.id.ButtonEnableProvider);
         btn.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
+				startService();
 				if (m_gpsService == null) return;
 				m_gpsService.setProviderEnabled(true);
 				showToast("プロバイダを有効にしました。");
@@ -163,18 +153,8 @@ public class MainActivity extends Activity {
 			public void onClick(View view) {
 				if (m_gpsService == null) return;
 				m_gpsService.setProviderEnabled(false);
-				showToast("プロバイダを無効にしました。");
-			}
-		});
-
-        // サービス停止
-        btn = (Button)findViewById(R.id.ButtonStopService);
-        btn.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				if (m_gpsService == null) return;
 				stopService();
-				showToast("サービスを停止しました。");
+				showToast("プロバイダを無効にしました。");
 			}
 		});
 
