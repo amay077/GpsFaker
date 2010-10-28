@@ -197,7 +197,7 @@ public class GpsSignalService extends Service {
 
 		// intentの設定
 		PendingIntent contentIntent =
-				PendingIntent.getActivity(this, 0, new Intent(this, GpsFaker.class), 0);
+				PendingIntent.getActivity(this, 0, new Intent(this, this.getClass()), 0);
 
 		m_notification.setLatestEventInfo(
 				getApplicationContext(),
