@@ -51,6 +51,10 @@ public class GpsSignalService extends Service {
 
 	// setter/getter ----------------------------------------------------------
 
+	public boolean isInitialized() {
+		return m_gpsLogReader != null;
+	}
+
 	public int getInterval() {
 		return m_interval;
 	}
@@ -59,7 +63,6 @@ public class GpsSignalService extends Service {
 	}
 
 	// overrides --------------------------------------------------------------
-
 	@Override
 	public IBinder onBind(Intent arg0) {
 		return new GpsSignalBinder();
@@ -69,7 +72,7 @@ public class GpsSignalService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 
-		stop();
+		unInit();
 	}
 
 	// public methods ---------------------------------------------------------
@@ -77,24 +80,6 @@ public class GpsSignalService extends Service {
 	public boolean init(String path) {
 		// GPSログ読み込み
 		try {
-			m_locMan = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-			m_locMan.addTestProvider(PROVIDER_NAME,
-	        		false, //requiresNetwork,
-	        		true,  //requiresSatellite,
-	        		false, //requiresCell,
-	        		false, //hasMonetaryCost,
-	        		true,  //supportsAltitude,
-	        		true,  //supportsSpeed,
-	        		false, //supportsBearing,
-	        		0,     //powerRequirement,
-	        		1);    //accuracy)
-
-			m_locMan.setTestProviderEnabled(PROVIDER_NAME, true);
-			m_locMan.setTestProviderStatus(PROVIDER_NAME,
-					LocationProvider.AVAILABLE, null, System.currentTimeMillis());
-
-
-
 			if (m_gpsLogReader != null) {
 				m_gpsLogReader.close();
 			}
@@ -117,21 +102,12 @@ public class GpsSignalService extends Service {
 	public void unInit() {
 
 		try {
-			stopTimer();
+			stop();
 
 			if (m_gpsLogReader != null) {
 				m_gpsLogReader.close();
 				m_gpsLogReader = null;
 			}
-
-			if (m_locMan != null) {
-				m_locMan.setTestProviderStatus(PROVIDER_NAME,
-						LocationProvider.OUT_OF_SERVICE, null, System.currentTimeMillis());
-				m_locMan.setTestProviderEnabled(PROVIDER_NAME, false);
-				m_locMan.removeTestProvider(PROVIDER_NAME);
-				m_locMan = null;
-			}
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -197,7 +173,7 @@ public class GpsSignalService extends Service {
 
 		// intentの設定
 		PendingIntent contentIntent =
-				PendingIntent.getActivity(this, 0, new Intent(this, this.getClass()), 0);
+				PendingIntent.getActivity(this.getApplicationContext(), 0, null, 0);
 
 		m_notification.setLatestEventInfo(
 				getApplicationContext(),
@@ -314,4 +290,37 @@ public class GpsSignalService extends Service {
 
 	}
 
+	public void setProviderEnabled(boolean enabled) {
+		if (enabled && (m_locMan == null)) {
+			m_locMan = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+			m_locMan.addTestProvider(PROVIDER_NAME,
+	        		false, //requiresNetwork,
+	        		true,  //requiresSatellite,
+	        		false, //requiresCell,
+	        		false, //hasMonetaryCost,
+	        		true,  //supportsAltitude,
+	        		true,  //supportsSpeed,
+	        		false, //supportsBearing,
+	        		0,     //powerRequirement,
+	        		1);    //accuracy)
+		}
+
+		if (m_locMan != null) {
+			// ここで onProviderEnabled/Disabled が出るはず
+			m_locMan.setTestProviderEnabled(PROVIDER_NAME, enabled);
+		}
+
+		if (!enabled && (m_locMan != null)) {
+			m_locMan.removeTestProvider(PROVIDER_NAME); // ←ここで本物のGPSも死んじゃうぽい
+			m_locMan = null;
+		}
+	}
+
+	public void setProviderStatus(int available) {
+		if (m_locMan != null) {
+			// ここで onStatusChanged(AVAILABLE etc) が出るはず
+			m_locMan.setTestProviderStatus(PROVIDER_NAME,
+					available, null, System.currentTimeMillis());
+		}
+	}
 }

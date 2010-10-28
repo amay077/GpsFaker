@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
@@ -24,7 +25,6 @@ public class MainActivity extends Activity {
 
 	// fields -----------------------------------------------------------------
 	private GpsSignalService m_gpsService = null;
-	private Context m_context = this;
 	private ServiceConnection m_serviceConnection = new ServiceConnection() {
 
 		@Override
@@ -78,25 +78,45 @@ public class MainActivity extends Activity {
 			}
 		});
 
-        // サービス停止
-        btn = (Button)findViewById(R.id.ButtonStopService);
+        // プロバイダ有効化
+        btn = (Button)findViewById(R.id.ButtonEnableProvider);
         btn.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				if (m_gpsService == null) return;
-				stopService();
-				showToast("サービスを停止しました。");
+				m_gpsService.setProviderEnabled(true);
+				showToast("プロバイダを有効にしました。");
 			}
 		});
 
-        // ログファイル選択
-        btn = (Button)findViewById(R.id.ButtonSelectGpsLog);
+        // プロバイダのステータス変更 - AVAILABLE
+        btn = (Button)findViewById(R.id.ButtonAvailable); // サービス有効
         btn.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
 			   	if (m_gpsService == null) return;
-				m_gpsService.init("/sdcard/gps.log");
-				showToast("GPSログファイルを設定しました。");
+				m_gpsService.setProviderStatus(LocationProvider.AVAILABLE);
+				showToast("ステータスを AVAILABLE にしました。");
+			}
+		});
+        // プロバイダのステータス変更 - OUT_OF_SERVICE
+        btn = (Button)findViewById(R.id.ButtonOutOfService); // サービス有効
+        btn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+			   	if (m_gpsService == null) return;
+				m_gpsService.setProviderStatus(LocationProvider.OUT_OF_SERVICE);
+				showToast("ステータスを OUT_OF_SERVICE にしました。");
+			}
+		});
+        // プロバイダのステータス変更 - TEMPORALY_UNAVAILABLE
+        btn = (Button)findViewById(R.id.ButtonTemporalyUnavailable); // サービス有効
+        btn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+			   	if (m_gpsService == null) return;
+				m_gpsService.setProviderStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
+				showToast("ステータスを TEMPORARILY_UNAVAILABLE にしました。");
 			}
 		});
 
@@ -106,6 +126,9 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View view) {
 			   	if (m_gpsService == null) return;
+			   	if (!m_gpsService.isInitialized()) {
+			   		m_gpsService.init("/sdcard/gps.log");
+			   	}
 				m_gpsService.play();
 				showToast("GPSログ再生を開始しました。");
 			}
@@ -133,8 +156,30 @@ public class MainActivity extends Activity {
 			}
 		});
 
+        // プロバイダ無効化
+        btn = (Button)findViewById(R.id.ButtonDisableProvider);
+        btn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				if (m_gpsService == null) return;
+				m_gpsService.setProviderEnabled(false);
+				showToast("プロバイダを無効にしました。");
+			}
+		});
+
+        // サービス停止
+        btn = (Button)findViewById(R.id.ButtonStopService);
+        btn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				if (m_gpsService == null) return;
+				stopService();
+				showToast("サービスを停止しました。");
+			}
+		});
+
 		// 既に起動しているかもしれないサービスに接続
-        Intent intent = new Intent(m_context, GpsSignalService.class);
+        Intent intent = new Intent(this, GpsSignalService.class);
 		bindService(intent, m_serviceConnection, 0);
     }
 
@@ -144,7 +189,7 @@ public class MainActivity extends Activity {
 
     private void startService() {
 		// サービスを開始
-		Intent intent = new Intent(m_context, GpsSignalService.class);
+		Intent intent = new Intent(this, GpsSignalService.class);
 		startService(intent);
 
 		// サービスにバインド
