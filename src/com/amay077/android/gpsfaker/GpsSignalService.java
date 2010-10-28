@@ -1,7 +1,7 @@
 /**
  *
  */
-package amay077.android.samples.GpsFaker;
+package com.amay077.android.gpsfaker;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.amay077.android.gpsfaker.R;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;

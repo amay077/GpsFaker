@@ -1,5 +1,6 @@
-package amay077.android.samples.GpsFaker;
+package com.amay077.android.gpsfaker;
 
+import com.amay077.android.gpsfaker.R;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
