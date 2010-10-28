@@ -20,7 +20,7 @@ import android.widget.Toast;
  * @author hironobu
  * tes
  */
-public class GpsFaker extends Activity {
+public class MainActivity extends Activity {
 
 	// fields -----------------------------------------------------------------
 	private GpsSignalService m_gpsService = null;
@@ -160,7 +160,7 @@ public class GpsFaker extends Activity {
     }
 
     private void showToast(String mes) {
-    	Toast.makeText(GpsFaker.this, mes, Toast.LENGTH_SHORT).show();
+    	Toast.makeText(MainActivity.this, mes, Toast.LENGTH_SHORT).show();
     }
 
 	// sub classes ------------------------------------------------------------
