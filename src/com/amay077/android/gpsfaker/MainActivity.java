@@ -11,6 +11,7 @@ import android.content.ServiceConnection;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -33,6 +34,9 @@ public class MainActivity extends Activity {
 
 			IntentFilter filter = new IntentFilter(GpsSignalService.CHANGE_LOCATION);
 			registerReceiver(m_receiver, filter);
+			
+			m_gpsService.setProviderEnabled(true);
+			showToast("プロバイダを有効にしました。");
 		}
 
 		@Override
@@ -73,9 +77,6 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View view) {
 				startService();
-				if (m_gpsService == null) return;
-				m_gpsService.setProviderEnabled(true);
-				showToast("プロバイダを有効にしました。");
 			}
 		});
 
