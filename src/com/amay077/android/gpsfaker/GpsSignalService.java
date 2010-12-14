@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -22,6 +23,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 
 /**
  * @author h_okuyama
@@ -292,6 +294,19 @@ public class GpsSignalService extends Service {
 	public void setProviderEnabled(boolean enabled) {
 		if (enabled && (m_locMan == null)) {
 			m_locMan = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+			try {
+				Hoge hoge = new Hoge();
+				Class c = this.m_locMan.getClass();
+				Field[] flds = c.getDeclaredFields();
+				for (int i = 0; i < flds.length; i++) {
+					Log.d("enumFields", flds[i].getName());
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
 			m_locMan.addTestProvider(PROVIDER_NAME,
 	        		false, //requiresNetwork,
 	        		true,  //requiresSatellite,
@@ -321,5 +336,9 @@ public class GpsSignalService extends Service {
 			m_locMan.setTestProviderStatus(PROVIDER_NAME,
 					available, null, System.currentTimeMillis());
 		}
+	}
+
+	class Hoge {
+		private String addr = "hoge";
 	}
 }
