@@ -9,6 +9,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -19,10 +21,15 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 
 /**
@@ -291,32 +298,98 @@ public class GpsSignalService extends Service {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setProviderEnabled(boolean enabled) {
 		if (enabled && (m_locMan == null)) {
 			m_locMan = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
 			try {
-				Hoge hoge = new Hoge();
+				//Hoge hoge = new Hoge();
 				Class c = this.m_locMan.getClass();
-				Field[] flds = c.getDeclaredFields();
-				for (int i = 0; i < flds.length; i++) {
-					Log.d("enumFields", flds[i].getName());
+
+				Field mServiceFld = c.getDeclaredField("mService");
+
+				mServiceFld.setAccessible(true);
+				Object mServiceObj = mServiceFld.get(m_locMan);
+
+//				Method[] methods = mServiceObj.getClass().getMethods();
+//				for (int i = 0; i < methods.length; i++) {
+//					Method method = methods[i];
+//					Log.d("method", method.getName() + ":" + String.valueOf(method.getParameterAnnotations().length));
+//
+//				}
+
+				Location loc = new Location(LocationManager.GPS_PROVIDER);
+				loc.setLatitude(35d);
+				loc.setLongitude(136d);
+
+				final int MESSAGE_LOCATION_CHANGED = 1;
+
+				// cast
+				Class LocationManagerServiceClass = Class.forName("com.android.server.LocationManagerService");
+				Class LocationManagerServiceClassStub = LocationManagerServiceClass.getSuperclass();
+				mServiceObj = LocationManagerServiceClass.cast(mServiceObj);
+								
+				Service srv;
+				
+				
+				Field[] fields = mServiceObj.getClass().getDeclaredFields();
+				for (int i = 0; i < fields.length; i++) {
+					Field field = fields[i];
+					Log.d("field", field.getName() + " as " + field.getType().getName());
+					field.setAccessible(true);
+					IBinder mRemote = (IBinder)field.get(mServiceObj);
+					
+					String interfaceDescriptor = mRemote.getInterfaceDescriptor();
+					Log.d("field", interfaceDescriptor);
+					
 				}
+				
+				
+				Field mLocationHandlerFld = mServiceObj.getClass().getDeclaredField("mLocationHandler");
+				mLocationHandlerFld.setAccessible(true);
+				Object mLocationHandlerObj = mLocationHandlerFld.get(mServiceObj);
+				Handler mLocationHandler = (Handler)mLocationHandlerObj;
+				
+		        mLocationHandler.removeMessages(MESSAGE_LOCATION_CHANGED, loc);
+		        Message m = Message.obtain((Handler)mLocationHandlerObj, MESSAGE_LOCATION_CHANGED, loc);
+		        mLocationHandler.sendMessageAtFrontOfQueue(m);
+
+//				Method m2 = iLocMan.getClass().getMethod("reportLocation", Location.class);
+//				m2.setAccessible(true);
+//				m2.invoke(iLocMan, loc);
+
+//				HashMap map = (HashMap)ILocMan;
+//
+//				for (Object obj : map.values()) {
+//					Log.d("values", obj.getClass().getName());
+//				}
+
+
+//				Field[] flds = c.getDeclaredFields();
+//				for (int i = 0; i < flds.length; i++) {
+//
+//					if (flds[i].getType() == HashMap.class) {
+//
+//					}
+//
+//					Log.d("enumFields", flds[i].getName());
+//				}
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
-			m_locMan.addTestProvider(PROVIDER_NAME,
-	        		false, //requiresNetwork,
-	        		true,  //requiresSatellite,
-	        		false, //requiresCell,
-	        		false, //hasMonetaryCost,
-	        		true,  //supportsAltitude,
-	        		true,  //supportsSpeed,
-	        		false, //supportsBearing,
-	        		0,     //powerRequirement,
-	        		1);    //accuracy)
+//			m_locMan.addTestProvider(PROVIDER_NAME,
+//	        		false, //requiresNetwork,
+//	        		true,  //requiresSatellite,
+//	        		false, //requiresCell,
+//	        		false, //hasMonetaryCost,
+//	        		true,  //supportsAltitude,
+//	        		true,  //supportsSpeed,
+//	        		false, //supportsBearing,
+//	        		0,     //powerRequirement,
+//	        		1);    //accuracy)
 		}
 
 		if (m_locMan != null) {
