@@ -5,7 +5,6 @@ package com.amay077.android.gpsfaker;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Timer;
@@ -24,41 +23,30 @@ import android.os.Binder;
 import android.os.IBinder;
 
 /**
- * @author h_okuyama
- * aaabbbb
+ * @author amay077
  */
 public class GpsSignalService extends Service {
-
-/*	// public fields ----------------------------------------------------------
-	public static final String ACTION = "Gps Faker Signal";
-*/
-	// fields -----------------------------------------------------------------
-	public static final String CHANGE_LOCATION = "GpsFaker ChangeLocation";
-	private final String PROVIDER_NAME = LocationManager.GPS_PROVIDER;
+	public static final String CHANGE_LOCATION = "com.amay077.android.gpsfaker.LOCATION_CHANGED";
+	private String providerName = LocationManager.GPS_PROVIDER;
 
 	private Timer m_timer = new Timer();
 	private LocationManager m_locMan = null;
-	private int m_interval = 1000;
+	private int intervalMS = 1000;
 	private BufferedReader m_gpsLogReader = null;
 
 	// 通知領域
 	private NotificationManager m_notificationManager = null;
 	private Notification m_notification = null;
 
-	// ctor -------------------------------------------------------------------
-	// - none -
-
-	// setter/getter ----------------------------------------------------------
-
 	public boolean isInitialized() {
 		return m_gpsLogReader != null;
 	}
 
 	public int getInterval() {
-		return m_interval;
+		return intervalMS;
 	}
 	public void setInterval(int mInterval) {
-		m_interval = mInterval;
+		intervalMS = mInterval;
 	}
 
 	// overrides --------------------------------------------------------------
@@ -76,25 +64,15 @@ public class GpsSignalService extends Service {
 
 	// public methods ---------------------------------------------------------
 
-	public boolean init(String path) {
+	public boolean init(String path) throws IOException {
 		// GPSログ読み込み
-		try {
-			if (m_gpsLogReader != null) {
-				m_gpsLogReader.close();
-			}
+		if (m_gpsLogReader != null)
+			m_gpsLogReader.close();
 
-			m_gpsLogReader = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+		m_gpsLogReader = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
 
-			// 通知領域の初期化
-			initNotify();
-
-		} catch (FileNotFoundException e) {
-			return false;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-
+		// 通知領域の初期化
+		initNotify();
 		return true;
 	}
 
@@ -122,7 +100,7 @@ public class GpsSignalService extends Service {
 
 		m_timer = new Timer(false);
 		TimerTask timerTask = new GpsSignalTask(m_locMan, m_gpsLogReader);
-		m_timer.schedule(timerTask, 0, m_interval);
+		m_timer.schedule(timerTask, 0, intervalMS);
 	}
 
 	public void pause() {
@@ -223,55 +201,50 @@ public class GpsSignalService extends Service {
 		// overrides --------------------------------------------------------------
 		@Override
 		public void run() {
+			// ファイルから１行よむ
+			String line = null;
 			try {
-
-				// ファイルから１行よむ
-				String line = m_gpsLogReader.readLine();
-				if (line == null) {
-					return;
-				}
-
-				// カンマで分割（経度,緯度,高度）
-				String[] buf = line.split(",");
-				Location loc = new Location(PROVIDER_NAME);
-				loc.setLongitude(Double.parseDouble(buf[0]));
-				loc.setLatitude(Double.parseDouble(buf[1]));
-				loc.setAltitude(Double.parseDouble(buf[2]));
-
-				// 速度を計算して設定
-				long curTime = System.currentTimeMillis();
-				if (m_location != null) {
-					float[] results = new float[3];
-					Location.distanceBetween(this.m_location.getLatitude(), this.m_location.getLongitude(),
-							loc.getLatitude(), loc.getLongitude(), results);
-					float sec = ((float)(curTime - m_location.getTime()))/1000.0f;
-	            	float meterPerSec = results[0] / sec;
-	            	loc.setSpeed(meterPerSec);
-				} else {
-	            	loc.setSpeed(0);
-				}
-            	loc.setTime(curTime);
-
-            	// GPSシグナル発火！
-				this.m_location = loc;
-				this.m_locMan.setTestProviderLocation(PROVIDER_NAME, this.m_location);
-
-				Intent intent = new Intent(CHANGE_LOCATION);
-				intent.putExtra("Latitude", this.m_location.getLatitude());
-				intent.putExtra("Longitude", this.m_location.getLongitude());
-				intent.putExtra("Altitude", this.m_location.getAltitude());
-				intent.putExtra("Speed", this.m_location.getSpeed());
-				intent.putExtra("Time", this.m_location.getTime());
-				GpsSignalService.this.sendBroadcast(intent);
-
+				line = m_gpsLogReader.readLine();
 			} catch (IOException e) {
-
-			} catch (NumberFormatException e) {
-
-			} catch (Exception e) {
-
+				e.printStackTrace();
 			}
+			if (line == null) return;
 
+			// カンマで分割（経度,緯度,高度）
+			String[] buf = line.split(",");
+			Location loc = new Location(providerName);
+			loc.setLongitude(Double.parseDouble(buf[0]));
+			loc.setLatitude(Double.parseDouble(buf[1]));
+			loc.setAltitude(Double.parseDouble(buf[2]));
+			loc.setAccuracy(3f);
+
+			// 速度を計算して設定
+			long curTime = System.currentTimeMillis();
+			if (m_location != null) {
+				float[] results = new float[3];
+				Location.distanceBetween(this.m_location.getLatitude(),
+						this.m_location.getLongitude(), loc.getLatitude(),
+						loc.getLongitude(), results);
+				float sec = ((float) (curTime - m_location.getTime())) / 1000.0f;
+				float meterPerSec = results[0] / sec;
+				loc.setSpeed(meterPerSec);
+			} else {
+				loc.setSpeed(0);
+			}
+			loc.setTime(curTime);
+
+			// GPSシグナル発火！
+			this.m_location = loc;
+			this.m_locMan
+					.setTestProviderLocation(providerName, this.m_location);
+
+			Intent intent = new Intent(CHANGE_LOCATION);
+			intent.putExtra("Latitude", this.m_location.getLatitude());
+			intent.putExtra("Longitude", this.m_location.getLongitude());
+			intent.putExtra("Altitude", this.m_location.getAltitude());
+			intent.putExtra("Speed", this.m_location.getSpeed());
+			intent.putExtra("Time", this.m_location.getTime());
+			GpsSignalService.this.sendBroadcast(intent);
 		}
 
 		// public methods ---------------------------------------------------------
@@ -292,7 +265,7 @@ public class GpsSignalService extends Service {
 	public void setProviderEnabled(boolean enabled) {
 		if (enabled && (m_locMan == null)) {
 			m_locMan = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-			m_locMan.addTestProvider(PROVIDER_NAME,
+			m_locMan.addTestProvider(providerName,
 	        		false, //requiresNetwork,
 	        		true,  //requiresSatellite,
 	        		false, //requiresCell,
@@ -306,11 +279,11 @@ public class GpsSignalService extends Service {
 
 		if (m_locMan != null) {
 			// ここで onProviderEnabled/Disabled が出るはず
-			m_locMan.setTestProviderEnabled(PROVIDER_NAME, enabled);
+			m_locMan.setTestProviderEnabled(providerName, enabled);
 		}
 
 		if (!enabled && (m_locMan != null)) {
-			m_locMan.removeTestProvider(PROVIDER_NAME); // ←ここで本物のGPSも死んじゃうぽい
+			m_locMan.removeTestProvider(providerName); // ←ここで本物のGPSも死んじゃうぽい
 			m_locMan = null;
 		}
 	}
@@ -318,8 +291,22 @@ public class GpsSignalService extends Service {
 	public void setProviderStatus(int available) {
 		if (m_locMan != null) {
 			// ここで onStatusChanged(AVAILABLE etc) が出るはず
-			m_locMan.setTestProviderStatus(PROVIDER_NAME,
+			m_locMan.setTestProviderStatus(providerName,
 					available, null, System.currentTimeMillis());
 		}
+	}
+
+	public void setIntervalMS(int signalIntervalMS) {
+		intervalMS = signalIntervalMS;
+	}
+	public int getIntervalMS() {
+		return intervalMS;
+	}
+
+	public void setProvider(String provider) {
+		providerName = provider;
+	}
+	public String getProvider() {
+		return providerName;
 	}
 }
