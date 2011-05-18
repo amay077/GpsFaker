@@ -58,8 +58,6 @@ public class GpsSignalService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-
-		unInit();
 	}
 
 	// public methods ---------------------------------------------------------
