@@ -14,10 +14,8 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -50,61 +48,72 @@ public class MainActivity extends Activity {
 
 		providerSpinner = (Spinner) findViewById(R.id.ProviderSpinner);
 		
-		final EditText edt = (EditText) findViewById(R.id.IntervalEdit);
-		edt.setOnFocusChangeListener(new OnFocusChangeListener() {
-			
-			@Override
-			public void onFocusChange(View v, boolean hasFocus) {
-				if (!hasFocus)
-					signalIntervalMS  = Integer.valueOf(edt.getText().toString());
-			}
-		});
+//		final EditText edt = (EditText) findViewById(R.id.IntervalEdit);
+//		edt.setOnFocusChangeListener(new OnFocusChangeListener() {
+//			
+//			@Override
+//			public void onFocusChange(View v, boolean hasFocus) {
+//				if (!hasFocus)
+//					signalIntervalMS  = Integer.valueOf(edt.getText().toString());
+//			}
+//		});
 		
-		// プロバイダ有効化
-		Button btn = (Button) findViewById(R.id.ButtonEnableProvider);
-		btn.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) { onProviderEnableButtonClick(view); }
-		});
+		Button btn;
+		
+//		// プロバイダ有効化
+//		btn = (Button) findViewById(R.id.ButtonEnableProvider);
+//		btn.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View view) { onProviderEnableButtonClick(view); }
+//		});
 
-		// プロバイダのステータス変更 - AVAILABLE
-		btn = (Button) findViewById(R.id.ButtonAvailable); // サービス有効
-		btn.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				if (m_gpsService == null)
-					return;
-				m_gpsService.setProviderStatus(LocationProvider.AVAILABLE);
-				showToast("ステータスを AVAILABLE にしました。");
-			}
-		});
-		// プロバイダのステータス変更 - OUT_OF_SERVICE
-		btn = (Button) findViewById(R.id.ButtonOutOfService); // サービス有効
-		btn.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				if (m_gpsService == null)
-					return;
-				m_gpsService.setProviderStatus(LocationProvider.OUT_OF_SERVICE);
-				showToast("ステータスを OUT_OF_SERVICE にしました。");
-			}
-		});
-		// プロバイダのステータス変更 - TEMPORALY_UNAVAILABLE
-		btn = (Button) findViewById(R.id.ButtonTemporalyUnavailable); // サービス有効
-		btn.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				if (m_gpsService == null)
-					return;
-				m_gpsService
-						.setProviderStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
-				showToast("ステータスを TEMPORARILY_UNAVAILABLE にしました。");
-			}
-		});
+//		// プロバイダのステータス変更 - AVAILABLE
+//		btn = (Button) findViewById(R.id.ButtonAvailable); // サービス有効
+//		btn.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View view) {
+//				if (m_gpsService == null)
+//					return;
+//				m_gpsService.setProviderStatus(LocationProvider.AVAILABLE);
+//				showToast("ステータスを AVAILABLE にしました。");
+//			}
+//		});
+//		// プロバイダのステータス変更 - OUT_OF_SERVICE
+//		btn = (Button) findViewById(R.id.ButtonOutOfService); // サービス有効
+//		btn.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View view) {
+//				if (m_gpsService == null)
+//					return;
+//				m_gpsService.setProviderStatus(LocationProvider.OUT_OF_SERVICE);
+//				showToast("ステータスを OUT_OF_SERVICE にしました。");
+//			}
+//		});
+//		// プロバイダのステータス変更 - TEMPORALY_UNAVAILABLE
+//		btn = (Button) findViewById(R.id.ButtonTemporalyUnavailable); // サービス有効
+//		btn.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View view) {
+//				if (m_gpsService == null)
+//					return;
+//				m_gpsService
+//						.setProviderStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
+//				showToast("ステータスを TEMPORARILY_UNAVAILABLE にしました。");
+//			}
+//		});
 
 		// 再生
 		btn = (Button) findViewById(R.id.ButtonPlay);
-		btn.setOnClickListener(new OnClickListener() { public void onClick(View view) { onPlayButtonClick(view); } });
+		btn.setOnClickListener(new OnClickListener() { public void onClick(View view) {
+			onProviderEnableButtonClick(view);
+			
+			if (m_gpsService == null)
+				return;
+			m_gpsService.setProviderStatus(LocationProvider.AVAILABLE);
+//			showToast("ステータスを AVAILABLE にしました。");
+
+			onPlayButtonClick(view); 
+		} });
 
 		// 一時停止
 		btn = (Button) findViewById(R.id.ButtonPause);
@@ -112,11 +121,14 @@ public class MainActivity extends Activity {
 
 		// 停止
 		btn = (Button) findViewById(R.id.ButtonStop);
-		btn.setOnClickListener(new OnClickListener() { public void onClick(View view) { onStopButtonClick(view); } });
+		btn.setOnClickListener(new OnClickListener() { public void onClick(View view) { 
+			onStopButtonClick(view); 
+			onProviderDisableButtonClick(view);
+		} });
 
-		// プロバイダ無効化
-		btn = (Button) findViewById(R.id.ButtonDisableProvider);
-		btn.setOnClickListener(new OnClickListener() { public void onClick(View view) { onProviderDisableButtonClick(view); } });
+//		// プロバイダ無効化
+//		btn = (Button) findViewById(R.id.ButtonDisableProvider);
+//		btn.setOnClickListener(new OnClickListener() { public void onClick(View view) { onProviderDisableButtonClick(view); } });
 
 		// 既に起動しているかもしれないサービスに接続
 		Intent intent = new Intent(this, GpsSignalService.class);
@@ -177,7 +189,7 @@ public class MainActivity extends Activity {
 	}
 
 	protected void onGpsSignalServiceConnected(ComponentName className, IBinder service) {
-		m_gpsService = ((GpsSignalService.GpsSignalBinder) service) .getService();
+		m_gpsService = ((GpsSignalService.GpsSignalBinder)service).getService();
 		showToast("サービスに接続しました。");
 	}
 

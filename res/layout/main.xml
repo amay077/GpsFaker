@@ -10,56 +10,56 @@
     android:drawSelectorOnTop="true"
     android:id="@+id/ProviderSpinner"
     android:entries="@array/providers" />
-  <Button
-    android:id="@+id/ButtonEnableProvider"
-    android:layout_height="wrap_content"
-    android:layout_width="fill_parent"
-    android:text="Enable DummyProvider" />
-  <TableLayout
-    android:id="@+id/TableLayout01"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:stretchColumns="1"
-    android:shrinkColumns="1">
-    <TableRow
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content">
-      <Button
-        android:id="@+id/ButtonAvailable"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="Available" />
-      <Button
-        android:id="@+id/ButtonOutOfService"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="OutOfService" />
-      <Button
-        android:id="@+id/ButtonTemporalyUnavailable"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="Unavailable" />
-    </TableRow>
-  </TableLayout>
-  <LinearLayout
-    android:layout_height="wrap_content"
-    android:layout_width="fill_parent"
-    android:orientation="horizontal">
-    <TextView
-      android:text="Interval(ms):"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:gravity="center_vertical"
-      android:layout_weight="0" />
-    <EditText
-      android:id="@+id/IntervalEdit"
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:inputType="number"
-      android:numeric="integer"
-      android:text="1000"
-      android:layout_weight="1" />
-  </LinearLayout>
+<!--  <Button-->
+<!--    android:id="@+id/ButtonEnableProvider"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:layout_width="fill_parent"-->
+<!--    android:text="Enable DummyProvider" />-->
+<!--  <TableLayout-->
+<!--    android:id="@+id/TableLayout01"-->
+<!--    android:layout_width="fill_parent"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:stretchColumns="1"-->
+<!--    android:shrinkColumns="1">-->
+<!--    <TableRow-->
+<!--      android:layout_width="fill_parent"-->
+<!--      android:layout_height="wrap_content">-->
+<!--      <Button-->
+<!--        android:id="@+id/ButtonAvailable"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:text="Available" />-->
+<!--      <Button-->
+<!--        android:id="@+id/ButtonOutOfService"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:text="OutOfService" />-->
+<!--      <Button-->
+<!--        android:id="@+id/ButtonTemporalyUnavailable"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:text="Unavailable" />-->
+<!--    </TableRow>-->
+<!--  </TableLayout>-->
+<!--  <LinearLayout-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:layout_width="fill_parent"-->
+<!--    android:orientation="horizontal">-->
+<!--    <TextView-->
+<!--      android:text="Interval(ms):"-->
+<!--      android:layout_width="wrap_content"-->
+<!--      android:layout_height="wrap_content"-->
+<!--      android:gravity="center_vertical"-->
+<!--      android:layout_weight="0" />-->
+<!--    <EditText-->
+<!--      android:id="@+id/IntervalEdit"-->
+<!--      android:layout_width="fill_parent"-->
+<!--      android:layout_height="wrap_content"-->
+<!--      android:inputType="number"-->
+<!--      android:numeric="integer"-->
+<!--      android:text="1000"-->
+<!--      android:layout_weight="1" />-->
+<!--  </LinearLayout>-->
   <Button
     android:id="@+id/ButtonPlay"
     android:layout_height="wrap_content"
@@ -75,9 +75,9 @@
     android:layout_height="wrap_content"
     android:layout_width="fill_parent"
     android:text="Stop" />
-  <Button
-    android:id="@+id/ButtonDisableProvider"
-    android:layout_height="wrap_content"
-    android:layout_width="fill_parent"
-    android:text="Disable DummyProvider" />
+<!--  <Button-->
+<!--    android:id="@+id/ButtonDisableProvider"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:layout_width="fill_parent"-->
+<!--    android:text="Disable DummyProvider" />-->
 </LinearLayout>

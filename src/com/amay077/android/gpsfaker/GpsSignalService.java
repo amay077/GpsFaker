@@ -11,6 +11,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.amay077.android.gpsfaker.R;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -146,9 +147,12 @@ public class GpsSignalService extends Service {
 				"GPSログの再生を開始しました。",
 				System.currentTimeMillis());
 
+		Intent notifyIntent = new Intent(this.getApplicationContext(), MainActivity.class);
+		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
 		// intentの設定
 		PendingIntent contentIntent =
-				PendingIntent.getActivity(this.getApplicationContext(), 0, null, 0);
+				PendingIntent.getActivity(this.getApplicationContext(), 0, notifyIntent, 0);
 
 		m_notification.setLatestEventInfo(
 				getApplicationContext(),
