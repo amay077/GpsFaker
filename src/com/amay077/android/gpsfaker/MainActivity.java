@@ -1,7 +1,5 @@
 package com.amay077.android.gpsfaker;
 
-import java.io.IOException;
-
 import com.amay077.android.gpsfaker.R;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -24,9 +22,11 @@ import android.widget.Toast;
  * @author amay077
  */
 public class MainActivity extends Activity {
+	private final Integer SIGNAL_INTERVAL_MS = 1000;
 	private Spinner providerSpinner = null;
+	private Intent serviceIntent = null;
 	
-	private GpsSignalService m_gpsService = null;
+	private GpsSignalServiceClient m_gpsService = null;
 	private ServiceConnection m_serviceConnection = new ServiceConnection() {
 
 		@Override
@@ -39,79 +39,21 @@ public class MainActivity extends Activity {
 			onGpsSignalServiceDisconnected(className);
 		}
 	};
-	protected Integer signalIntervalMS = 1000;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
+		serviceIntent = new Intent(IGpsSignalService.class.getName());
+		
 		providerSpinner = (Spinner) findViewById(R.id.ProviderSpinner);
 		
-//		final EditText edt = (EditText) findViewById(R.id.IntervalEdit);
-//		edt.setOnFocusChangeListener(new OnFocusChangeListener() {
-//			
-//			@Override
-//			public void onFocusChange(View v, boolean hasFocus) {
-//				if (!hasFocus)
-//					signalIntervalMS  = Integer.valueOf(edt.getText().toString());
-//			}
-//		});
-		
 		Button btn;
-		
-//		// プロバイダ有効化
-//		btn = (Button) findViewById(R.id.ButtonEnableProvider);
-//		btn.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View view) { onProviderEnableButtonClick(view); }
-//		});
-
-//		// プロバイダのステータス変更 - AVAILABLE
-//		btn = (Button) findViewById(R.id.ButtonAvailable); // サービス有効
-//		btn.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View view) {
-//				if (m_gpsService == null)
-//					return;
-//				m_gpsService.setProviderStatus(LocationProvider.AVAILABLE);
-//				showToast("ステータスを AVAILABLE にしました。");
-//			}
-//		});
-//		// プロバイダのステータス変更 - OUT_OF_SERVICE
-//		btn = (Button) findViewById(R.id.ButtonOutOfService); // サービス有効
-//		btn.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View view) {
-//				if (m_gpsService == null)
-//					return;
-//				m_gpsService.setProviderStatus(LocationProvider.OUT_OF_SERVICE);
-//				showToast("ステータスを OUT_OF_SERVICE にしました。");
-//			}
-//		});
-//		// プロバイダのステータス変更 - TEMPORALY_UNAVAILABLE
-//		btn = (Button) findViewById(R.id.ButtonTemporalyUnavailable); // サービス有効
-//		btn.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View view) {
-//				if (m_gpsService == null)
-//					return;
-//				m_gpsService
-//						.setProviderStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
-//				showToast("ステータスを TEMPORARILY_UNAVAILABLE にしました。");
-//			}
-//		});
 
 		// 再生
 		btn = (Button) findViewById(R.id.ButtonPlay);
 		btn.setOnClickListener(new OnClickListener() { public void onClick(View view) {
-			onProviderEnableButtonClick(view);
-			
-			if (m_gpsService == null)
-				return;
-			m_gpsService.setProviderStatus(LocationProvider.AVAILABLE);
-//			showToast("ステータスを AVAILABLE にしました。");
-
 			onPlayButtonClick(view); 
 		} });
 
@@ -123,21 +65,9 @@ public class MainActivity extends Activity {
 		btn = (Button) findViewById(R.id.ButtonStop);
 		btn.setOnClickListener(new OnClickListener() { public void onClick(View view) { 
 			onStopButtonClick(view); 
-			onProviderDisableButtonClick(view);
 		} });
 
-//		// プロバイダ無効化
-//		btn = (Button) findViewById(R.id.ButtonDisableProvider);
-//		btn.setOnClickListener(new OnClickListener() { public void onClick(View view) { onProviderDisableButtonClick(view); } });
-
-		// 既に起動しているかもしれないサービスに接続
-		Intent intent = new Intent(this, GpsSignalService.class);
-		bindService(intent, m_serviceConnection, Context.BIND_AUTO_CREATE);
-	}
-
-	protected void onProviderNothingSelected(AdapterView<?> parent) {
-		// TODO Auto-generated method stub
-		
+		bindService(serviceIntent, m_serviceConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	protected void onProviderSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -147,17 +77,11 @@ public class MainActivity extends Activity {
 		m_gpsService.setProvider((String)spn.getSelectedItem());
 	}
 
-	protected void onProviderDisableButtonClick(View view) {
-		if (m_gpsService == null) return;
-		m_gpsService.setProviderEnabled(false);
-		stopService();
-		showToast("プロバイダを無効にしました。");
-	}
-
 	protected void onStopButtonClick(View view) {
 		if (m_gpsService == null) return;
 		m_gpsService.stop();
-		showToast("GPSログ再生を停止しました。Play で最初から再生します。");
+		m_gpsService.setProviderEnabled(false);
+		stopService();
 	}
 
 	protected void onPauseButtonClick(View view) {
@@ -168,17 +92,17 @@ public class MainActivity extends Activity {
 
 	protected void onPlayButtonClick(View view) {
 		if (m_gpsService == null) return;
+		
+		m_gpsService.setProvider(providerSpinner.getSelectedItem().toString());
+		m_gpsService.setProviderEnabled(true);
+		m_gpsService.setProviderStatus(LocationProvider.AVAILABLE);
+
 		if (!m_gpsService.isInitialized()) {
 			String sdCardDir = Environment.getExternalStorageDirectory().getPath();
 			String gpsLogPath = sdCardDir + "/GpsFaker/gps.log";
-			try {
-				m_gpsService.init(gpsLogPath);
-			} catch (IOException e) {
-				showToast(gpsLogPath + " が見つからないか開けません");
-				return;
-			}
+			m_gpsService.init(gpsLogPath);
 		}
-		m_gpsService.setIntervalMS(signalIntervalMS);
+		m_gpsService.setInterval(SIGNAL_INTERVAL_MS);
 		m_gpsService.play();
 		showToast("GPSログ再生を開始しました。");
 	}
@@ -189,36 +113,26 @@ public class MainActivity extends Activity {
 	}
 
 	protected void onGpsSignalServiceConnected(ComponentName className, IBinder service) {
-		m_gpsService = ((GpsSignalService.GpsSignalBinder)service).getService();
+		m_gpsService = new GpsSignalServiceClient(IGpsSignalService.Stub.asInterface(service));
 		showToast("サービスに接続しました。");
-	}
-
-	protected void onProviderEnableButtonClick(View view) {
-		if (m_gpsService == null) {
-			// サービスを開始
-			Intent intent = new Intent(this, GpsSignalService.class);
-			startService(intent);
-
-			// サービスにバインド
-			bindService(intent, m_serviceConnection, Context.BIND_AUTO_CREATE);
-		} else {
-			m_gpsService.setProvider(providerSpinner.getSelectedItem().toString());
-			m_gpsService.setProviderEnabled(true);
-		}
 	}
 
 	private void stopService() {
 		if (m_gpsService == null) return;
-
-		unbindService(m_serviceConnection); // バインド解除
-		m_gpsService.stopSelf();
+		stopService(serviceIntent);
 		showToast("サービスを停止しました。");
 	}
 
 	private void showToast(String mes) {
 		Toast.makeText(MainActivity.this, mes, Toast.LENGTH_SHORT).show();
 	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		
+		unbindService(m_serviceConnection); // バインド解除
+	}
 
-	// sub classes ------------------------------------------------------------
 
 }
