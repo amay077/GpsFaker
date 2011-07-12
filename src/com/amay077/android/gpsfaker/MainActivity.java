@@ -99,7 +99,8 @@ public class MainActivity extends Activity {
 
 		if (!m_gpsService.isInitialized()) {
 			String sdCardDir = Environment.getExternalStorageDirectory().getPath();
-			String gpsLogPath = sdCardDir + "/GpsFaker/gps.log";
+//			String gpsLogPath = sdCardDir + "/GpsFaker/gps.log";
+			String gpsLogPath = sdCardDir + "/GpsFaker/gps.gpx";
 			m_gpsService.init(gpsLogPath);
 		}
 		m_gpsService.setInterval(SIGNAL_INTERVAL_MS);

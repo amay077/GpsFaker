@@ -12,7 +12,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    <service android:enabled="true" android:name=".GpsSignalService" android:process=":service">
+<!--     <service android:enabled="true" android:name=".GpsSignalService" android:process=":service"> -->
+    <service android:enabled="true" android:name=".GpsSignalService">
         <intent-filter>
             <action android:name="com.amay077.android.gpsfaker.IGpsSignalService"  />
         </intent-filter>
