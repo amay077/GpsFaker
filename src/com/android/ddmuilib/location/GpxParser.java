@@ -22,8 +22,10 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -62,7 +64,7 @@ public class GpxParser {
         sParserFactory.setNamespaceAware(true);
     }
 
-    private String mFileName;
+    private InputStreamReader mInputReader;
 
     private GpxHandler mHandler;
 
@@ -321,8 +323,8 @@ public class GpxParser {
      * Creates a new GPX parser for a file specified by its full path.
      * @param fileName The full path of the GPX file to parse.
      */
-    public GpxParser(String fileName) {
-        mFileName = fileName;
+    public GpxParser(InputStreamReader in) {
+        mInputReader = in;
     }
 
     /**
@@ -335,7 +337,7 @@ public class GpxParser {
 
             mHandler = new GpxHandler();
 
-            parser.parse(new InputSource(new FileReader(mFileName)), mHandler);
+            parser.parse(new InputSource(mInputReader), mHandler);
 
             return mHandler.getSuccess();
         } catch (ParserConfigurationException e) {
