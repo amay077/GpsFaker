@@ -43,7 +43,7 @@ public class MainViewModel {
 	public void init(Context context) {
 		_context = new WeakReference<Context>(context);
 		String sdCardDir = Environment.getExternalStorageDirectory().getPath();
-		gpxPath.set(sdCardDir + "/GpsFaker/gps.gpx");
+		gpxPath.set("20121211.gqlog");
 		playStatus.set(PlayStatus.Stop);
 	}
 	

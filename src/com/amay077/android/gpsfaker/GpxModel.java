@@ -1,10 +1,13 @@
 package com.amay077.android.gpsfaker;
 
+import java.io.BufferedReader;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Executors;
@@ -18,6 +21,7 @@ import com.android.ddmuilib.location.TrackPoint;
 import com.android.ddmuilib.location.GpxParser.Track;
 
 import hu.akarnokd.reactive4java.base.Func1;
+import hu.akarnokd.reactive4java.base.Functions;
 import hu.akarnokd.reactive4java.reactive.Observable;
 import hu.akarnokd.reactive4java.reactive.Observer;
 import hu.akarnokd.reactive4java.reactive.Reactive;
@@ -32,7 +36,7 @@ public class GpxModel {
 	private static final String TAG = "GpxModel";
 	private static final String PROVIDER_NAME = LocationManager.GPS_PROVIDER; //"GpsFaker";
 
-	public Observable<Location> getLocationAsObservable(final Context context, final String gpxPath) {
+	public Observable<Location> getLocationAsObservable(final Context context, final String logName) {
 		return Reactive.createWithCloseable(new Func1<Observer<? super Location>, Closeable>() {
 			@Override
 			public Closeable invoke(final Observer<? super Location> observer) {
@@ -40,7 +44,16 @@ public class GpxModel {
 				final AtomicBoolean stopped = new AtomicBoolean(false);
 				final ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
 				
-				final List<Location> testData = makeGpsData(context, gpxPath);
+				final List<Location> testData;
+				if (logName.endsWith(".gqlog")) {
+					testData = makeGpsDataFromGqLog(context, logName);
+				} else if (logName.endsWith(".gpx")) {
+					testData = makeGpsDataFromGpx(context, logName);
+				} else {
+					observer.error(new UnsupportedOperationException(logName + " is invalid."));
+					return Functions.EMPTY_CLOSEABLE;
+				}
+				
 				final AtomicInteger index = new AtomicInteger(0);
 				
 				final LocationManager locMan = (LocationManager)context
@@ -87,13 +100,76 @@ public class GpxModel {
 		});
 	}
 
-	private List<Location> makeGpsData(Context context, String gpxPath) throws NoSuchElementException {
+	private List<Location> makeGpsDataFromGqLog(Context context, String gqLogName) throws NoSuchElementException {
 		List<Location> locations = new ArrayList<Location>();
 		
 		AssetManager assetManager = context.getResources().getAssets();  
 		InputStream input;
 		try {
-			input = assetManager.open("example.gpx");
+			input = assetManager.open(gqLogName);
+		} catch (IOException e) {
+			Log.e(TAG, "asset open failed.", e);
+			return locations; 
+		}  
+		
+		try {
+			final long now = System.currentTimeMillis();
+			Long prev = null;
+			List<String> lines = readAsStringList(input, "UTF-8");
+			for (String line : lines) {
+				String[] cols = line.split(",");
+				
+				if (cols.length < 8) {
+					continue;
+				}
+				
+				long time = Long.valueOf(cols[0]) * 1000;
+				Location location = new Location(PROVIDER_NAME);
+				location.setLatitude(Double.valueOf(cols[1]));
+				location.setLongitude(Double.valueOf(cols[2]));
+				location.setAltitude(Double.valueOf(cols[3]));
+				location.setAccuracy(Float.valueOf(cols[4]));
+
+				if (prev == null) {
+					location.setTime(now);
+				} else {
+					location.setTime(now + (time - prev));
+				}
+				prev = time;
+				locations.add(location);
+			}
+		} catch (IOException e) {
+			Log.w(TAG, "location parse failed.", e);
+		}
+	
+		return locations;
+	}
+	
+	private static List<String> readAsStringList(InputStream stream, String encoding) throws IOException {
+		if (stream != null) {
+			ArrayList<String> list = new ArrayList<String>();
+			try {
+				BufferedReader reader = new BufferedReader(new InputStreamReader(stream, encoding));
+				String line;
+				while (null != (line = reader.readLine())) {
+					list.add(line);
+				}
+			} finally {
+				stream.close();
+			}
+			return list;
+		} else {
+			return Collections.emptyList();
+		}
+	}
+
+	private List<Location> makeGpsDataFromGpx(Context context, String gpxPath) throws NoSuchElementException {
+		List<Location> locations = new ArrayList<Location>();
+		
+		AssetManager assetManager = context.getResources().getAssets();  
+		InputStream input;
+		try {
+			input = assetManager.open(gpxPath);
 		} catch (IOException e) {
 			Log.e(TAG, "asset open failed.", e);
 			return locations; 
@@ -109,12 +185,20 @@ public class GpxModel {
 			return locations;
 		}
 		
+		final long now = System.currentTimeMillis();
+		Long prev = null;
 		for (TrackPoint point : tracks[0].getPoints()) {
 			Location location = new Location(PROVIDER_NAME);
 			location.setLatitude(point.getLatitude());
 			location.setLongitude(point.getLongitude());
 			location.setAccuracy(10f);
 			location.setAltitude(point.getElevation());
+			if (prev == null) {
+				location.setTime(now);
+			} else {
+				location.setTime(now + (point.getTime() - prev));
+			}
+			prev = point.getTime();
 // NOTE ignore			location.setTime(point.getTime());
 			locations.add(location);
 		}
