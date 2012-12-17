@@ -1,8 +1,7 @@
-package com.amay077.android.gpsfaker;
+package com.amay077.android.gpsfaker.model;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,6 +19,7 @@ import com.android.ddmuilib.location.GpxParser;
 import com.android.ddmuilib.location.TrackPoint;
 import com.android.ddmuilib.location.GpxParser.Track;
 
+import hu.akarnokd.reactive4java.base.Func0;
 import hu.akarnokd.reactive4java.base.Func1;
 import hu.akarnokd.reactive4java.base.Functions;
 import hu.akarnokd.reactive4java.reactive.Observable;
@@ -36,7 +36,8 @@ public class GpxModel {
 	private static final String TAG = "GpxModel";
 	private static final String PROVIDER_NAME = LocationManager.GPS_PROVIDER; //"GpsFaker";
 
-	public Observable<Location> getLocationAsObservable(final Context context, final String logName) {
+	public Observable<Location> getLocationAsObservable(final Context context, final String logName,
+			final Func0<Boolean> pauseF) {
 		return Reactive.createWithCloseable(new Func1<Observer<? super Location>, Closeable>() {
 			@Override
 			public Closeable invoke(final Observer<? super Location> observer) {
@@ -67,6 +68,10 @@ public class GpxModel {
 						// 停止されていたら、値を無視する
 						// ※停止要求した直後は意味が報告されることを想定しての処理。
 						if (stopped.get()) {
+							return;
+						}
+						
+						if (pauseF.invoke()) {
 							return;
 						}
 						

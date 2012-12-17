@@ -7,5 +7,6 @@
   <string-array name="courses">
     <item>example.gpx</item>
     <item>20121211.gqlog</item>
-  </string-array>
+    <item>20121217.gqlog</item>
+    </string-array>
 </resources>

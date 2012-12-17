@@ -4,7 +4,7 @@
       android:versionCode="1"
       android:versionName="1.0">
       
-    <uses-sdk android:minSdkVersion="4" />
+    <uses-sdk android:minSdkVersion="5" />
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -19,6 +19,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <service android:name=".service.GpsSignalService" />
     </application>
 
 </manifest>

@@ -74,7 +74,7 @@ public class MainActivity extends Activity {
 	
 	@Override
 	protected void onDestroy() {
-		_viewModel.ternimate();
+		_viewModel.terminate();
 		super.onDestroy();
 	}
 }
