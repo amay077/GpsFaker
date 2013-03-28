@@ -1,7 +1,6 @@
 package com.amay077.android.gpsfaker;
 
 import android.app.Activity;
-import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 

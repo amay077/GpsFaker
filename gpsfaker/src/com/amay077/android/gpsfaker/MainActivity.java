@@ -11,7 +11,6 @@ import com.amay077.android.mvvm.Command;
 import com.amay077.lang.IProperty.OnValueChangedListener;
 import com.amay077.lang.ObservableValue;
 
-import android.app.Application;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
