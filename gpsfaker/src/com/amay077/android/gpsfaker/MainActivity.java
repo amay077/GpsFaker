@@ -1,13 +1,15 @@
 package com.amay077.android.gpsfaker;
 
+import java.util.Map;
+
 import hu.akarnokd.reactive4java.base.Func1;
 
 import com.amay077.android.gpsfaker.R;
 import com.amay077.android.mvvm.BaseActivity;
 import com.amay077.android.mvvm.BaseViewModel;
-import com.amay077.lang.Command;
+import com.amay077.android.mvvm.Command;
+import com.amay077.lang.IProperty.OnValueChangedListener;
 import com.amay077.lang.ObservableValue;
-import com.amay077.lang.ObservableValue.OnValueChangedListener;
 
 import android.app.Application;
 import android.os.Bundle;
@@ -22,7 +24,7 @@ import android.widget.Spinner;
  * 
  * @author amay077
  */
-public class MainActivity extends BaseActivity<Application> {
+public class MainActivity extends BaseActivity {
 	private MainViewModel _viewModel;
 
 	@Override
@@ -88,7 +90,7 @@ public class MainActivity extends BaseActivity<Application> {
 		button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				executeCommand(command);
+				command.execute();
 			}
 		});
 	}
@@ -119,5 +121,11 @@ public class MainActivity extends BaseActivity<Application> {
 	protected void onDestroy() {
 		_viewModel.onDestroyView();
 		super.onDestroy();
+	}
+
+	@Override
+	protected void onBindMenu(Map<Integer, Command> menuMap) {
+		// TODO Auto-generated method stub
+		
 	}
 }

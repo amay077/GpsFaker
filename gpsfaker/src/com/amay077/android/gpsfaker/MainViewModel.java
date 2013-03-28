@@ -1,14 +1,15 @@
 package com.amay077.android.gpsfaker;
 
+import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
 import com.amay077.android.gpsfaker.service.GpsSignalClient;
 import com.amay077.android.mvvm.BaseViewModel;
+import com.amay077.android.mvvm.Command;
 import com.amay077.android.mvvm.DefaultCommand;
 import com.amay077.android.service.BaseServiceClient.ConnectionListener;
-import com.amay077.lang.Command;
 import com.amay077.lang.ObservableValue;
 
 public class MainViewModel extends BaseViewModel {
@@ -24,7 +25,7 @@ public class MainViewModel extends BaseViewModel {
 	public final ObservableValue<Location> gpsLocation = new ObservableValue<Location>();
 
 	@Override
-	protected void onBindViewCompleted(Context context) {
+	protected void onBindViewCompleted(Activity context) {
 		_serviceClient = new GpsSignalClient(context);
 		_serviceClient.startService(new ConnectionListener() {
 			@Override
@@ -79,5 +80,17 @@ public class MainViewModel extends BaseViewModel {
 		if (_serviceClient != null) {
 			_serviceClient.stopServiceIfDeactiveAndClose();
 		}
+	}
+
+	@Override
+	protected void onResumeView(Activity activity) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onPauseView(Activity activity) {
+		// TODO Auto-generated method stub
+		
 	}
 }

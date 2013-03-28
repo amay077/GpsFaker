@@ -24,7 +24,8 @@ public class GpsSignalService extends Service {
 		Log.i(TAG, "onStartCommand Received start id " + startId + ": "
 				+ intent);
 		// 明示的にサービスの起動、停止が決められる場合の返り値
-		return START_STICKY;
+//		return START_STICKY;
+		return START_REDELIVER_INTENT;
 	}
 	
 	@Override

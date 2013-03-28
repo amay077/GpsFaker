@@ -1,0 +1,3 @@
+[submodule "amay077lib"]
+	path = amay077lib
+	url = git@bitbucket.org:amay077/amay077lib.git
