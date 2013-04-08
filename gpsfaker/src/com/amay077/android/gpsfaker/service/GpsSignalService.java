@@ -1,5 +1,6 @@
 package com.amay077.android.gpsfaker.service;
 
+import com.amay077.android.gpsfaker.MainActivity;
 import com.amay077.android.gpsfaker.R;
 import com.amay077.android.util.Log;
 
@@ -40,12 +41,14 @@ public class GpsSignalService extends Service {
 	}
 	
 	void showLoggingNotification() {
-		Intent intent = new Intent();
+		Intent intent = new Intent(this.getApplicationContext(), MainActivity.class);
 		String tickerText = "開始しました";
 		String contentTitle = getString(R.string.app_name);
 		String contentText = "開始です";
 		
-		PendingIntent contentIntent = PendingIntent.getService(this, 0, intent, 0);
+		// NOTE http://onno.jp/dev/2011/11/android-notification-intent-activity.html
+		PendingIntent contentIntent = PendingIntent.getActivity(this,
+				0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
 		Notification notification = new Notification(R.drawable.icon, tickerText, System.currentTimeMillis());
 		notification.setLatestEventInfo(getApplicationContext(), contentTitle, contentText, contentIntent);
 		notification.flags = Notification.FLAG_ONGOING_EVENT;
